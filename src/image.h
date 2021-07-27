@@ -14,6 +14,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include <tchar.h>
 /*
 typedef struct {
     int w;
@@ -84,6 +85,7 @@ image float_to_image_scaled(int w, int h, int c, float *data);
 image float_to_image(int w, int h, int c, float *data);
 image copy_image(image p);
 void copy_image_inplace(image src, image dst);
+image load_image_bytes(TCHAR chReadBuf, int w, int h, int c);
 image load_image(char *filename, int w, int h, int c);
 image load_image_stb_resize(char *filename, int w, int h, int c);
 //LIB_API image load_image_color(char *filename, int w, int h);

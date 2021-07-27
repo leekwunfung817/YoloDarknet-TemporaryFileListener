@@ -19,6 +19,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 #endif
+#include <tchar.h>
 
 extern int check_mistakes;
 //int windows = 0;
@@ -1524,6 +1525,23 @@ image load_image_stb(char *filename, int channels)
 image load_image_stb_resize(char *filename, int w, int h, int c)
 {
     image out = load_image_stb(filename, c);    // without OpenCV
+
+    if ((h && w) && (h != out.h || w != out.w)) {
+        image resized = resize_image(out, w, h);
+        free_image(out);
+        out = resized;
+    }
+    return out;
+}
+
+image load_image_bytes(TCHAR chReadBuf, int w, int h, int c)
+{
+#ifdef OPENCV
+    //image out = load_image_stb(filename, c);
+    image out = load_image_cv(chReadBuf, c);
+#else
+    image out = load_image_stb(filename, c);    // without OpenCV
+#endif  // OPENCV
 
     if ((h && w) && (h != out.h || w != out.w)) {
         image resized = resize_image(out, w, h);

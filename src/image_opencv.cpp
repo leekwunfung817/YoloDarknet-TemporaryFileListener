@@ -17,6 +17,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/opencv_modules.hpp>
+#include <opencv2/imgcodecs.hpp>
+
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/video/video.hpp>
@@ -68,10 +70,12 @@ using std::endl;
 #ifndef CV_RGB
 #define CV_RGB(r, g, b) cvScalar( (b), (g), (r), 0 )
 #endif
+#include <tchar.h>
 
 #ifndef CV_FILLED
 #define CV_FILLED cv::FILLED
 #endif
+using namespace cv;
 
 #ifndef CV_AA
 #define CV_AA cv::LINE_AA
@@ -155,6 +159,16 @@ cv::Mat load_image_mat(char *filename, int channels)
     return mat;
 }
 // ----------------------------------------
+
+extern "C" image load_image_cv_bytes(TCHAR chReadBuf, int channels)
+{
+    cv::Mat mat = cv::imdecode(chReadBuf, channels);
+
+    if (mat.empty()) {
+        return make_image(10, 10, channels);
+    }
+    return mat_to_image(mat);
+}
 
 extern "C" image load_image_cv(char *filename, int channels)
 {
