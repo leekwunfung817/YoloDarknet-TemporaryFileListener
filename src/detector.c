@@ -1640,7 +1640,7 @@ void test_detector_namedPipes(char* datacfg, char* cfgfile, char* weightfile, ch
             NULL,           // default security attributes
             OPEN_EXISTING,  // opens existing pipe 
             0,              // default attributes 
-            NULL);          // no template file 
+            NULL);          // no template file
          // Break if the pipe handle is valid. 
         if (hPipeRead != INVALID_HANDLE_VALUE)
             break;
@@ -1650,7 +1650,6 @@ void test_detector_namedPipes(char* datacfg, char* cfgfile, char* weightfile, ch
             _tprintf(TEXT("Could not open pipe. GLE=%d\n"), GetLastError());
             return -1;
         }
-
         // All pipe instances are busy, so wait for 20 seconds. 
         if (!WaitNamedPipe(lpszPipenameRead, 20000))
         {
@@ -1658,10 +1657,49 @@ void test_detector_namedPipes(char* datacfg, char* cfgfile, char* weightfile, ch
             return -1;
         }
     }
+    while (1)
+    {
+        hPipeWrite = CreateFile(
+            lpszPipenameWrite,   // pipe name 
+            GENERIC_READ |  // read and write access 
+            GENERIC_WRITE,
+            0,              // no sharing 
+            NULL,           // default security attributes
+            OPEN_EXISTING,  // opens existing pipe 
+            0,              // default attributes 
+            NULL);          // no template file
+         // Break if the pipe handle is valid. 
+        if (hPipeWrite != INVALID_HANDLE_VALUE)
+            break;
+        // Exit if an error other than ERROR_PIPE_BUSY occurs. 
+        if (GetLastError() != ERROR_PIPE_BUSY)
+        {
+            _tprintf(TEXT("Could not open pipe. GLE=%d\n"), GetLastError());
+            return -1;
+        }
+        // All pipe instances are busy, so wait for 20 seconds. 
+        if (!WaitNamedPipe(lpszPipenameWrite, 20000))
+        {
+            printf("Could not open pipe: 20 second wait timed out.");
+            return -1;
+        }
+
+
+    }
     // The pipe connected; change to message-read mode. 
     dwMode = PIPE_READMODE_MESSAGE;
     fSuccess = SetNamedPipeHandleState(
         hPipeRead,    // pipe handle 
+        &dwMode,  // new pipe mode 
+        NULL,     // don't set maximum bytes 
+        NULL);    // don't set maximum time 
+    if (!fSuccess)
+    {
+        _tprintf(TEXT("SetNamedPipeHandleState failed. GLE=%d\n"), GetLastError());
+        return -1;
+    }
+    fSuccess = SetNamedPipeHandleState(
+        hPipeWrite,    // pipe handle 
         &dwMode,  // new pipe mode 
         NULL,     // don't set maximum bytes 
         NULL);    // don't set maximum time 
@@ -1789,15 +1827,26 @@ void test_detector_namedPipes(char* datacfg, char* cfgfile, char* weightfile, ch
             if (class_id >= 0) {
                 sprintf(buff, "%d %2.4f %2.4f %2.4f %2.4f\n", class_id, dets[i].bbox.x, dets[i].bbox.y, dets[i].bbox.w, dets[i].bbox.h);
                 //fwrite(buff, sizeof(char), strlen(buff), fw);
-                /*
 
+                // Named pipes Write ===== ===== ===== ===== =====
+                // Named pipes Write ===== ===== ===== ===== =====
+                // Send a message to the pipe server. 
+                cbToWrite = (lstrlen(buff) + 1) * sizeof(TCHAR);
+                _tprintf(TEXT("Sending %d byte message: \n"), cbToWrite);
                 fSuccess = WriteFile(
-                    hPipe,                  // pipe handle 
+                    hPipeWrite,                  // pipe handle 
                     buff,             // message 
                     cbToWrite,              // message length 
                     &cbWritten,             // bytes written 
-                    NULL);                  // not overlapped
-                    */
+                    NULL);                  // not overlapped 
+                if (!fSuccess)
+                {
+                    _tprintf(TEXT("WriteFile to pipe failed. GLE=%d\n"), GetLastError());
+                    return -1;
+                }
+                // Named pipes Write ===== ===== ===== ===== =====
+                // Named pipes Write ===== ===== ===== ===== =====
+
 
             }
         }
@@ -1815,6 +1864,7 @@ void test_detector_namedPipes(char* datacfg, char* cfgfile, char* weightfile, ch
 
     // named pipes
     _getch();
+    CloseHandle(hPipeWrite);
     CloseHandle(hPipeRead);
     // named pipes
 
@@ -2253,6 +2303,7 @@ void run_detector(int argc, char **argv)
             if (weights[strlen(weights) - 1] == 0x0d) weights[strlen(weights) - 1] = 0;
     char *filename = (argc > 6) ? argv[6] : 0;
     if (0 == strcmp(argv[2], "test")) test_detector(datacfg, cfg, weights, filename, thresh, hier_thresh, dont_show, ext_output, save_labels, outfile, letter_box, benchmark_layers);
+    else if (0 == strcmp(argv[2], "testByNamedPipes")) test_detector_namedPipes(datacfg, cfg, weights, filename, thresh, hier_thresh, dont_show, ext_output, save_labels, outfile, letter_box, benchmark_layers);
     else if (0 == strcmp(argv[2], "train")) train_detector(datacfg, cfg, weights, gpus, ngpus, clear, dont_show, calc_map, mjpeg_port, show_imgs, benchmark_layers, chart_path);
     else if (0 == strcmp(argv[2], "valid")) validate_detector(datacfg, cfg, weights, outfile);
     else if (0 == strcmp(argv[2], "recall")) validate_detector_recall(datacfg, cfg, weights);
