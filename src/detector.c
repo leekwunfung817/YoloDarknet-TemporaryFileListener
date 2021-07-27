@@ -1656,6 +1656,33 @@ void test_detector_namedPipes(char* datacfg, char* cfgfile, char* weightfile, ch
             printf("Could not open pipe: 20 second wait timed out.");
             return -1;
         }
+
+        hPipeWrite = CreateFile(
+            lpszPipenameWrite,   // pipe name 
+            GENERIC_READ |  // read and write access 
+            GENERIC_WRITE,
+            0,              // no sharing 
+            NULL,           // default security attributes
+            OPEN_EXISTING,  // opens existing pipe 
+            0,              // default attributes 
+            NULL);          // no template file
+         // Break if the pipe handle is valid. 
+        if (hPipeWrite != INVALID_HANDLE_VALUE)
+            break;
+        // Exit if an error other than ERROR_PIPE_BUSY occurs. 
+        if (GetLastError() != ERROR_PIPE_BUSY)
+        {
+            _tprintf(TEXT("Could not open pipe. GLE=%d\n"), GetLastError());
+            return -1;
+        }
+        // All pipe instances are busy, so wait for 20 seconds. 
+        if (!WaitNamedPipe(lpszPipenameWrite, 20000))
+        {
+            printf("Could not open pipe: 20 second wait timed out.");
+            return -1;
+        }
+
+
     }
     while (1)
     {
