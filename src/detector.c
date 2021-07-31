@@ -1987,37 +1987,7 @@ void test_detector_named_pipes_service(char* datacfg, char* cfgfile, char* weigh
         TCHAR chReadBuf[BUFSIZE];
         BOOL fSuccess = FALSE;
         DWORD  cbRead, cbToWrite, cbWritten, dwMode;
-        //LPTSTR lpszPipenameRead = _T("\\\\.\\pipe\\darknet_image");
-/*
-        // read section begin
-        printf(" CreateFile \n");
-        hPipeRead = CreateFile(
-            _T("\\\\.\\pipe\\darknet_image"),   // pipe name 
-            GENERIC_READ | GENERIC_WRITE  // read and write access 
-            ,
-            0,              // no sharing 
-            NULL,           // default security attributes
-            OPEN_EXISTING,  // opens existing pipe 
-            0,              // default attributes 
-            NULL);          // no template file
 
-    // The pipe connected; change to message-read mode. 
-        printf(" SetNamedPipeHandleState \n");
-        fSuccess = SetNamedPipeHandleState(
-            hPipeRead,    // pipe handle 
-            PIPE_READMODE_MESSAGE,  // new pipe mode 
-            NULL,     // don't set maximum bytes 
-            NULL);    // don't set maximum time 
-        if (!fSuccess)
-        {
-            _tprintf(TEXT("SetNamedPipeHandleState failed. GLE=%d\n"), GetLastError());
-            return -1;
-        }
-        else {
-            printf(" SetNamedPipeHandleState success \n");
-        }
-        // read section end
-*/
         // write section begin
         printf(" CreateNamedPipe \n");
         hPipeWrite = CreateNamedPipe(
@@ -2043,6 +2013,37 @@ void test_detector_named_pipes_service(char* datacfg, char* cfgfile, char* weigh
         }
         // write section end
 
+        // read section begin
+        printf(" CreateFile \n");
+        hPipeRead = CreateFile(
+            _T("\\\\.\\pipe\\darknet_image"),   // pipe name 
+            GENERIC_READ | GENERIC_WRITE  // read and write access 
+            ,
+            0,              // no sharing 
+            NULL,           // default security attributes
+            OPEN_EXISTING,  // opens existing pipe 
+            0,              // default attributes 
+            NULL);          // no template file
+
+    // The pipe connected; change to message-read mode. 
+        printf(" SetNamedPipeHandleState \n");
+        dwMode = PIPE_READMODE_MESSAGE;
+        fSuccess = SetNamedPipeHandleState(
+            hPipeRead,    // pipe handle 
+            &dwMode,  // new pipe mode 
+            NULL,     // don't set maximum bytes 
+            NULL);    // don't set maximum time 
+        if (!fSuccess)
+        {
+            _tprintf(TEXT("SetNamedPipeHandleState failed. GLE=%d\n"), GetLastError());
+            return -1;
+        }
+        else {
+            printf(" SetNamedPipeHandleState success \n");
+        }
+        // read section end
+/*
+*/
         printf(" named pipes End \n");
 
 /*
