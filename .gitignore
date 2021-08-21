@@ -62,3 +62,6 @@ uselib
 uselib_track
 darknet
 vcpkg/
+/build/darknet/.vs/darknet/v16/ipch/AutoPCH/9316ca64fce9c2d4/*.ipch
+/build/darknet/.vs/darknet/v16/ipch/AutoPCH/d23638b92be3b089/*.ipch
+/build/darknet/.vs/darknet/v16/ipch/AutoPCH/f4f1afc5835ba870/*.ipch

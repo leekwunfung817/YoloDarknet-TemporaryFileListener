@@ -1,4 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LocalDebuggerCommandArguments> detector test_detector_named_pipes_service train.config.data ctr4.cfg backup/ctr4_last.weights -dont_show -save_labels -ext_output data/11_1_i_h__20190621093202_27871908.jpg</LocalDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>..\..\..\AI-TrainData-PscalVOC-and-Yolo-CarTypeRecognition\TestCase</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
 </Project>

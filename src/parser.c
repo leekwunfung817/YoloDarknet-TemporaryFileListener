@@ -1359,9 +1359,11 @@ network parse_network_cfg(char *filename)
 
 network parse_network_cfg_custom(char *filename, int batch, int time_steps)
 {
+    printf("parse_network_cfg_customBegin\n");
     list *sections = read_cfg(filename);
     node *n = sections->front;
     if(!n) error("Config file has no sections");
+    printf("make_network\n");
     network net = make_network(sections->size - 1);
     net.gpu_index = gpu_index;
     size_params params;
@@ -1369,9 +1371,11 @@ network parse_network_cfg_custom(char *filename, int batch, int time_steps)
     if (batch > 0) params.train = 0;    // allocates memory for Detection only
     else params.train = 1;              // allocates memory for Detection & Training
 
+    printf("section *s\n");
     section *s = (section *)n->val;
     list *options = s->options;
     if(!is_network(s)) error("First section must be [net] or [network]");
+    printf("parse_net_options\n");
     parse_net_options(options, &net);
 
 #ifdef GPU
@@ -1381,6 +1385,7 @@ network parse_network_cfg_custom(char *filename, int batch, int time_steps)
     }
 #endif  // GPU
 
+    printf("GPU\n");
     params.h = net.h;
     params.w = net.w;
     params.c = net.c;
