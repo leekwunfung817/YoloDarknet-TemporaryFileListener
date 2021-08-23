@@ -1974,17 +1974,17 @@ void test_detector_named_pipes_service(char* datacfg, char* cfgfile, char* weigh
 
 
             //处理读到的数据
-            printf("server receive %d bytes\n", cbBytesRead);
+            //printf("server receive %d bytes\n", cbBytesRead);
 
 
-            printf("named pipes ReadFile END \n");
+            //printf("named pipes ReadFile END \n");
             // named pipes End
 
 
 
             //image im;
             //image sized = load_image_resize(input, net.w, net.h, net.c, &im);
-            printf(" load_image \n");
+            //printf(" load_image \n");
             image im = load_image_from_memory(pchPipeRead, cbBytesRead);
 
 
@@ -1998,7 +1998,7 @@ void test_detector_named_pipes_service(char* datacfg, char* cfgfile, char* weigh
                 layer lk = net.layers[k];
                 if (lk.type == YOLO || lk.type == GAUSSIAN_YOLO || lk.type == REGION) {
                     l = lk;
-                    printf(" Detection layer: %d - type = %d \n", k, l.type);
+                    //printf(" Detection layer: %d - type = %d \n", k, l.type);
                 }
             }
 
@@ -2010,7 +2010,7 @@ void test_detector_named_pipes_service(char* datacfg, char* cfgfile, char* weigh
 
             //time= what_time_is_it_now();
             double time = get_time_point();
-            printf(" network_predict \n");
+            //printf(" network_predict \n");
             network_predict(net, X);
             //network_predict_image(&net, im); letterbox = 1;
             printf("%s: Predicted in %lf milli-seconds.\n", input, ((double)get_time_point() - time) / 1000);
@@ -2023,11 +2023,11 @@ void test_detector_named_pipes_service(char* datacfg, char* cfgfile, char* weigh
                 else diounms_sort(dets, nboxes, l.classes, nms, l.nms_kind, l.beta_nms);
             }
             draw_detections_v3(im, dets, nboxes, thresh, names, alphabet, l.classes, ext_output);
-            save_image(im, "predictions");
-            if (!dont_show) {
-                show_image(im, "predictions");
-            }
-
+            //save_image(im, "predictions");
+            //if (!dont_show) {
+            //    show_image(im, "predictions");
+            //}
+            /*
             printf(" detection_to_json \n");
             if (json_file) {
                 if (json_buf) {
@@ -2041,18 +2041,20 @@ void test_detector_named_pipes_service(char* datacfg, char* cfgfile, char* weigh
                 free(json_buf);
             }
 
+            */
+
 
 
             cbReplyBytes = 0;
 
-            printf(" save_labels \n");
+            //printf(" save_labels \n");
             // pseudo labeling concept - fast.ai
-            if (save_labels)
-            {
+            //if (save_labels)
+            //{
                 char labelpath[4096];
-                replace_image_to_label(input, labelpath);
+                // replace_image_to_label(input, labelpath);
 
-                FILE* fw = fopen(labelpath, "wb");
+                //FILE* fw = fopen(labelpath, "wb");
                 int i;
                 for (i = 0; i < nboxes; ++i) {
                     char buff[1024];
@@ -2068,11 +2070,11 @@ void test_detector_named_pipes_service(char* datacfg, char* cfgfile, char* weigh
                     {
                         cbReplyBytes += sprintf(pchPipeWrite, "%d %2.4f %2.4f %2.4f %2.4f\n", class_id, dets[i].bbox.x, dets[i].bbox.y, dets[i].bbox.w, dets[i].bbox.h);
 
-                        fwrite(buff, sizeof(char), strlen(buff), fw);
+                        //fwrite(buff, sizeof(char), strlen(buff), fw);
                     }
                 }
-                fclose(fw);
-            }
+                //fclose(fw);
+            //}
 
             if (cbReplyBytes == 0)
             {
