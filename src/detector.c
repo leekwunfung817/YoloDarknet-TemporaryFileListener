@@ -1833,7 +1833,7 @@ void test_detector_namedPipes(char* datacfg, char* cfgfile, char* weightfile, ch
 
 
 void test_detector_named_pipes_service(char* datacfg, char* cfgfile, char* weightfile, char* filename, float thresh,
-    float hier_thresh, int dont_show, int ext_output, int save_labels, char* outfile, int letter_box, int benchmark_layers)
+    float hier_thresh, int dont_show, int ext_output, int save_labels, char* outfile, int letter_box, int benchmark_layers, char* pipe_name)
 {
     printf(" test_detector_named_pipes_service \n");
     printf(" read_data_cfg \n");
@@ -1894,6 +1894,7 @@ void test_detector_named_pipes_service(char* datacfg, char* cfgfile, char* weigh
     HANDLE hHeap = GetProcessHeap();
     char* pchPipeRead = (char*)HeapAlloc(hHeap, 0, BUFSIZE);
     char* pchPipeWrite = (char*)HeapAlloc(hHeap, 0, BUFSIZE);
+    // char* pipe_annotation = (char*)HeapAlloc(hHeap, 0, BUFSIZE);
 
     DWORD cbBytesRead = 0, cbReplyBytes = 0, cbWritten = 0;
     BOOL fSuccess = FALSE;
@@ -1911,12 +1912,16 @@ void test_detector_named_pipes_service(char* datacfg, char* cfgfile, char* weigh
             break;
         }
 
-        // named pipes Begin
+        // named pipes sprintf
         printf("named pipes Begin \n");
-
+        
+        char pipe_annotation[1024];
         printf(" CreateNamedPipe \n");
+        sprintf(pipe_annotation, "\\\\.\\pipe\\%s", pipe_name);
+
+        // pipe_name
         hPipe = CreateNamedPipe(
-            _T("\\\\.\\pipe\\darknet_anotation"),   // pipe name 
+            _T(pipe_annotation),   // pipe name 
             PIPE_ACCESS_DUPLEX,
             PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,              // no sharing 
             1,
@@ -1942,7 +1947,8 @@ void test_detector_named_pipes_service(char* datacfg, char* cfgfile, char* weigh
         }
         else
         {
-            printf(" named pipes create failed \n");
+            printf("named pipes create failed \n");
+            Sleep(1000);
             continue;
         }
 
@@ -2531,6 +2537,7 @@ void run_detector(int argc, char** argv)
     int ext_output = find_arg(argc, argv, "-ext_output");
     int save_labels = find_arg(argc, argv, "-save_labels");
     char* chart_path = find_char_arg(argc, argv, "-chart", 0);
+    char* pipe_name = find_char_arg(argc, argv, "-pipe_name", 0);
     if (argc < 4) {
         fprintf(stderr, "usage: %s %s [train/test/valid/demo/map] [data] [cfg] [weights (optional)]\n", argv[0], argv[1]);
         return;
@@ -2570,7 +2577,7 @@ void run_detector(int argc, char** argv)
     char* filename = (argc > 6) ? argv[6] : 0;
     if (0 == strcmp(argv[2], "test")) test_detector(datacfg, cfg, weights, filename, thresh, hier_thresh, dont_show, ext_output, save_labels, outfile, letter_box, benchmark_layers);
     else if (0 == strcmp(argv[2], "testByNamedPipes")) test_detector_namedPipes(datacfg, cfg, weights, filename, thresh, hier_thresh, dont_show, ext_output, save_labels, outfile, letter_box, benchmark_layers);
-    else if (0 == strcmp(argv[2], "test_detector_named_pipes_service")) test_detector_named_pipes_service(datacfg, cfg, weights, filename, thresh, hier_thresh, dont_show, ext_output, save_labels, outfile, letter_box, benchmark_layers);
+    else if (0 == strcmp(argv[2], "test_detector_named_pipes_service")) test_detector_named_pipes_service(datacfg, cfg, weights, filename, thresh, hier_thresh, dont_show, ext_output, save_labels, outfile, letter_box, benchmark_layers, pipe_name);
     else if (0 == strcmp(argv[2], "train")) train_detector(datacfg, cfg, weights, gpus, ngpus, clear, dont_show, calc_map, mjpeg_port, show_imgs, benchmark_layers, chart_path);
     else if (0 == strcmp(argv[2], "valid")) validate_detector(datacfg, cfg, weights, outfile);
     else if (0 == strcmp(argv[2], "recall")) validate_detector_recall(datacfg, cfg, weights);
